@@ -1,0 +1,16 @@
+name: MyPaperPlugin
+version: '${version}'
+main: com.woxloi.template.MyPaperPlugin
+api-version: '1.20'
+authors: [YourName]
+description: ShimePluginLibrary 1.1.0 を利用する Paper プラグインのテンプレートです。
+depend: [ShimePluginLibrary]
+commands:
+  mypaperplugin:
+    description: MyPaperPlugin のメインコマンド。
+    usage: /mypaperplugin
+    permission: mypaperplugin.use
+permissions:
+  mypaperplugin.use:
+    description: メインコマンドの使用を許可します。
+    default: true

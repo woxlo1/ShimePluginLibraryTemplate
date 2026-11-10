@@ -1,0 +1,76 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+// テンプレートから作成したプラグインの基本設定です。
+group = 'com.example'
+version = '1.0.0'
+
+// ShimePluginLibrary の利用バージョン。通常はこの値を変更せずに利用できます。
+def shimeVersion = findProperty('shimeVersion') ?: '1.1.0'
+
+def githubActor = System.getenv('GITHUB_ACTOR') ?: findProperty('gpr.user')
+def githubToken = System.getenv('GITHUB_TOKEN') ?: findProperty('gpr.key')
+
+repositories {
+    maven {
+        name = 'GitHubPackages'
+        url = uri('https://maven.pkg.github.com/woxlo1/ShimePluginLibrary')
+        credentials {
+            username = githubActor
+            password = githubToken
+        }
+    }
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+dependencies {
+    // Paper API はサーバー側から提供されるため compileOnly にします。
+    compileOnly 'io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT'
+
+    // ShimePluginLibrary の公開モジュール。ライブラリ本体はこのプロジェクトに含めません。
+    implementation "shimeserver:shimepluginlibrary:${shimeVersion}"
+    implementation "shimeserver:shimeplugincommand:${shimeVersion}"
+    implementation "shimeserver:shimepluginnms:${shimeVersion}"
+
+    // Shadow JAR に Kotlin ランタイムを含めます。
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
+}
+
+// Kotlin のコンパイル対象を Java 21 に統一します。
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+        freeCompilerArgs.add('-Xjvm-default=all')
+    }
+}
+
+// plugin.yml の version を Gradle の project.version から設定します。
+processResources {
+    filteringCharset = 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand(version: project.version)
+    }
+}
+
+// 依存ライブラリと Kotlin ランタイムを成果物へまとめます。
+shadowJar {
+    archiveClassifier.set('')
+    mergeServiceFiles()
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}

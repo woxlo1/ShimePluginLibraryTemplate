@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import shimeserver.shimepluginlibrary.shimeapi.ShimeLibrary
 import shimeserver.shimepluginlibrary.shimecommand.ShimeCommandManager
 import shimeserver.shimepluginlibrary.shimecommand.ShimeCommandRegistration
+import shimeserver.shimepluginlibrary.shimelogging.ShimeLogCategory
 
 /**
  * ShimePluginLibrary を利用する Paper プラグインのエントリーポイントです。
@@ -37,7 +38,7 @@ class MyPaperPlugin : JavaPlugin() {
 
         try {
             commandRegistration = TemplateCommands(this, manager).register()
-            library.logger.info("MyPaperPlugin が有効になりました。")
+            library.logger.info(ShimeLogCategory.CORE, "MyPaperPlugin が有効になりました。")
         } catch (exception: Exception) {
             logger.severe("コマンドの登録に失敗しました: ${exception.message}")
             exception.printStackTrace()
